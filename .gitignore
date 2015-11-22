@@ -51,6 +51,7 @@ test/
 
 # Visual Studio files
 .vs
+x64
 *.opensdf
 *.sdf
 *.suo
