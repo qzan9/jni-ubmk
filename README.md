@@ -3,8 +3,11 @@
 micro-benchmarking JNI ... is that really necessary for modern JVM?!?
 
 > millibenchmarks are not really hard
+> 
 > microbenchmarks are challenging, but OK
+> 
 > nanobenchmarks are the damned beast!
+> 
 > picobenchmarks ...
 
 * do not expect too much from micro-benchmarks; they measure only a limited
