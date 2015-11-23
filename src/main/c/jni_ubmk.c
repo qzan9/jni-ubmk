@@ -13,14 +13,14 @@ extern "C" {
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *, void *);
 //JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *, void *);
 
-JNIEXPORT int JNICALL zero(JNIEnv *);
+JNIEXPORT int JNICALL emptyJniCall(JNIEnv *);
 
 #ifdef __cplusplus
 }
 #endif
 
 static const JNINativeMethod methods[] = {
-	{ "zero", "()I", (void *)zero },
+	{ "emptyJniCall", "()I", (void *)emptyJniCall },
 };
 
 JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved)
@@ -48,7 +48,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved)
 //{
 //}
 
-JNIEXPORT int JNICALL zero(JNIEnv *env)
+JNIEXPORT int JNICALL emptyJniCall(JNIEnv *env)
 {
 	return 0;
 }

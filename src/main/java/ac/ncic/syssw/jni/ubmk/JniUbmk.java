@@ -5,5 +5,12 @@ public final class JniUbmk {
 		System.loadLibrary("jni-ubmk");
 	}
 
-	public static native int zero();
+	/**
+	 * simply return ZER0; consider it as an empty JNI call.
+	 */
+	public static native int emptyJniCall();
+
+	public static int emptyJvmMethod() {
+		return 0;
+	}
 }
