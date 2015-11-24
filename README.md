@@ -1,6 +1,6 @@
 # jni-ubmk #
 
-micro-benchmarking JNI ... is that really necessary for modern JVM?!?
+micro-benchmarking JNI/Java ... is that really necessary for modern JVM?!?
 
 > millibenchmarks are not really hard.
 > 
@@ -15,15 +15,17 @@ such as functionality, reliability, maintainability, extensibility, time to
 market, and other business and engineering considerations. it is much harder
 to measure the performance of Java language constructs than it looks.
 
-> if i could offer but one advice on this, it would be this: don't. it is too
-> easy to get it wrong and bad advice resulting from bad measurement is like
-> cancer.
+> you're not always measuring what you think you're measuring.
+
+in fact, you're *usually not* measuring what you think you're measuring.
 
 # JVM Performance #
 
 under the hood of JVM, understanding dynamic compilation and optimization is
 the key to understanding how to tell a good microbenchmark (and there are
 woefully few of these) from the bad ones.
+
+## Just-in-time compilation ##
 
 when Java source codes are converted into JVM bytecodes, unlike static
 compilers, `javac` does very little optimization -- the optimizations that
@@ -35,6 +37,8 @@ machine code before execution, but does so in a lazy fashion: the JIT only
 compiles a code path when it knows that code path is about to be executed.
 to avoid a significant startup penalty, the JIT compiler has to be fast, which
 means that it cannot spend as much time optimizing.
+
+## HotSpot dynamic compilation ##
 
 the HotSpot execution process combines interpretation, profiling, and dynamic
 compilation. HotSpot first runs as an interpreter and only compiles the "hot"
@@ -54,12 +58,16 @@ to make things more complicated, HotSpot comes with two compilers:
 
 the default is to use the client compiler.
 
+## Continuous recompilation ##
+
 HotSpot compilation is not an all-or-nothing proposition. after interpreting a
 code path a certain number of times, it is compiled into machine code. but the
 JVM continues profiling, and may recompile the code again later with a higher
 level of optimization if it decides the code path is particularly hot or future
 profiling data suggests opportunities for additional optimization. the JVM may
 recompile the same bytecodes many times in a single application execution.
+
+## On-stack replacement ##
 
 initial version of HotSpot performs compilation one method at a time. after the
 method is compiled, it does not switch to the compiled version until the method
@@ -79,6 +87,56 @@ new classes, or the execution of code paths that have not yet been traversed in
 already-loaded classes. timing measurements in the face of continuous
 recompilation can be quite noisy and misleading, and it is often necessary to
 run Java code for quite a long time before obtaining useful performance data.
+
+# JVM compiler #
+
+## Dead-code elimination ##
+
+optimizing compilers are adept at spotting dead code -- code that has no effect
+on the outcome of the program execution. many microbenchmarks perform much
+"better" when run with `-server` than with `-client`, not because the server
+compiler is faster (though it often is) but because the server compiler is more
+adept at optimizing away blocks of dead code.
+
+## Warmup ##
+
+if you're looking to measure the performance of idiom X, you generally want to
+measure its compiled performance, not its interpreted performance. to do so
+requires "warming up" the JVM -- executing your target operation enough times
+that the compiler will have had time to run and replace the interpreted code
+with compiled code before starting to time the execution.
+
+today's dynamic compiler runs at less predictable times, the JVM switches from
+interpreted to compiled code at will, and the same code path may be compiled
+and recompiled more than once during a run. if you don't account for the timing
+of these events, they can seriously distort your timing results.
+
+so, how much warmup is enough? you don't know. the best you can do is run your
+benchmarks with `-XX: +PrintCompilation`, observe what causes the compiler to
+kick in, then restructure your benchmark program to ensure that all of this
+compilation occurs before you start timing and that no further compilation
+occurs in the middle of your timing loops.
+
+## Garbage collection ##
+
+don't forget GC -- a small change in the number of iterations could mean the
+difference between no garbage collection and one garbage collection, skewing
+the "time per iteration" measurement.
+
+run your benchmarks with `-verbose:gc`, you can see how much time is spent in
+garbage collection and adjust your timing data accordingly.
+
+## Dynamic deoptimization ##
+
+many standard optimizations can only be performed within a "basic block" and
+so inlining method calls is often important to achieve good optimization.
+
+inconveniently, virtual functions pose an impediment to inlining, and virtual
+function calls are more common in Java language than in C++. considering that
+classes can be loaded dynamically, the compiler can make aggressive inlining
+decisions to achieve higher performance, then back out those decisions later
+if they are no longer based on valid assumptions, and will invalidate the
+generated code and revert to interpretation or recompilation.
 
 # Tips #
 
