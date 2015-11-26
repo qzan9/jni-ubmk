@@ -41,32 +41,38 @@ public class RunBmk {
 		}
 	}
 
-	public void uBmkSomeCalc() {
-		int i = 100, j = 100, k = 10000;
+	public void uBmkSomeCalc(String[] args) {
+		int x, y, z;
+		if (args.length != 3) {
+			x = 100; y = 100; z = 10000;
+		} else {
+			x = Integer.parseInt(args[0]);
+			y = Integer.parseInt(args[1]);
+			z = Integer.parseInt(args[2]);
+		}
 
 		System.out.println("=== calculation benchmark ===");
 
 		/* warm up. */
 		System.out.println("warming up ... ignore the outputs ...");
 		for (int t = 0; t < 10; t++) {
-			System.out.println(someCalcJvm(i, j, k));
-//			System.out.println(someCalcJni(i, j, k));
+			System.out.println(t + " - " + someCalcJni(x, y, z) + ", " + someCalcJvm(x, y, z));
 		}
 
-		/* JIT may be done; start real benchmarking ... */
-		System.out.println();
-		System.out.println("start timing ...");
+		/* JIT may be finished; start real benchmarking. */
+		System.out.println("start benchmarking ...");
 		long then0 = System.currentTimeMillis();
-		double test0 = someCalcJni(i, j, k);
+		double test0 = someCalcJni(x, y, z);
 		long  now0 = System.currentTimeMillis();
 
 		long then1 = System.currentTimeMillis();
-		double test1 = someCalcJvm(i, j, k);
+		double test1 = someCalcJvm(x, y, z);
 		long  now1 = System.currentTimeMillis();
 
 		System.out.printf("JNI result: %.6f, %d ms.\n", test0, (now0 - then0));
 		System.out.printf("JVM result: %.6f, %d ms.\n", test1, (now1 - then1));
 
 		System.out.println("======");
+		System.out.println();
 	}
 }
