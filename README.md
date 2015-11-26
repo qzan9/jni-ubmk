@@ -12,8 +12,8 @@ micro-benchmarking JNI/Java ... is that really necessary for modern JVM?!?
 
 most of the time performance needs to be balanced against other requirements,
 such as functionality, reliability, maintainability, extensibility, time to
-market, and other business and engineering considerations. it is much harder
-to measure the performance of Java language constructs than it looks.
+market, and other business and engineering considerations. as for Java language
+constructs, it is much harder to measure the performance than it looks.
 
 > you're not always measuring what you think you're measuring.
 
@@ -21,8 +21,9 @@ in fact, you're *usually not* measuring what you think you're measuring.
 
 # JVM Performance #
 
-under the hood of JVM, understanding dynamic compilation and optimization is
-the key to understanding how to tell a good microbenchmark (and there are
+JIT compiler is the heart of the JVM. nothing in the JVM affects performance
+more than the compiler, and understanding dynamic compilation and optimization
+is the key to understanding how to tell a good microbenchmark (and there are
 woefully few of these) from the bad ones.
 
 ## Just-in-time compilation ##
@@ -56,7 +57,22 @@ to make things more complicated, HotSpot comes with two compilers:
   intended for long-running server applications; the server compiler can
   perform an impressive variety of optimizations.
 
-the default is to use the client compiler.
+the default is to use the client compiler. JVM developers often refer to the
+compilers by the names `C1` (compiler 1, client compiler) and `C2` (compiler 2,
+server compiler).
+
+the primary difference between the two compilers is their aggressiveness in
+compiling code. the client compiler begins compiling sooner than the server
+compiler does. this means that during the beginning of code execution, the
+client compiler will be faster, because it will have compiled correspondingly
+more code than the server compiler.
+
+the engineering trade-off here is the knowledge the server compiler gains
+while it waits: that knowledge allows the server compiler to make better
+optimizations in the compiled code.
+
+in Java 7, to use tiered compilation, specify the server compiler with
+`-server` and include the flag `-XX:+TieredCompilation`.
 
 ## Continuous recompilation ##
 
