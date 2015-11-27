@@ -19,12 +19,62 @@ constructs, it is much harder to measure the performance than it looks.
 
 in fact, you're *usually not* measuring what you think you're measuring.
 
-# JVM Performance #
+# JIT Compiler #
 
 JIT compiler is the heart of the JVM. nothing in the JVM affects performance
 more than the compiler, and understanding dynamic compilation and optimization
 is the key to understanding how to tell a good microbenchmark (and there are
 woefully few of these) from the bad ones.
+
+## 32-bit and 64-bit ##
+
+there are three versions of the JIT compiler
+
+* a 32-bit client version (`-client`),
+
+* a 32-bit server version (`-server`),
+
+* a 64-bit server version (`-d64`).
+
+32-bit binary is expected to have (up to) two compilers, while the 64-bit
+binary will have only a single compiler. in fact, the 64-bit binary will have
+two compilers, since the client compiler is needed to support tiered
+compilation. but a 64-bit JVM cannot be run with only the client compiler.
+
+if the size of your heap will be less than about 3GB, the 32-bit version of
+Java will be faster and have a smaller footprint. programs that make extensive
+use of `long` or `double` variables will be slower on a 32-bit JVM because they
+cannot use the CPU's 64-bit registers, though that is a very exceptional case.
+
+## C1 and C2 ##
+
+HotSpot comes with two compilers:
+
+* the client compiler (C1): optimized to reduce application startup time and
+  memory footprint, employing fewer complex optimizations than the server
+  compiler, and accordingly requiring less time for compilation.
+
+* the server compiler (C2): optimized to maximize peak operating speed, and is
+  intended for long-running server applications; the server compiler can
+  perform an impressive variety of optimizations.
+
+the default is to use the client compiler.
+
+the primary difference between the two compilers is their aggressiveness in
+compiling code. the client compiler begins compiling sooner than the server
+compiler does. this means that during the beginning of code execution, the
+client compiler will be faster, because it will have compiled correspondingly
+more code than the server compiler.
+
+the engineering trade-off here is the knowledge the server compiler gains
+while it waits: that knowledge allows the server compiler to make better
+optimizations in the compiled code. ultimately, code produced by the server
+compiler will be faster than that produced by the client compiler.
+
+tiered compilation means the JVM starts with the client compiler, and then uses
+the server compiler as code gets hotter. in Java 7, to use tiered compilation,
+specify the server compiler with `-server` and include the flag
+`-XX:+TieredCompilation`. in Java 8, it is enabled by default.
 
 ## Just-in-time compilation ##
 
@@ -46,33 +96,6 @@ compilation. HotSpot first runs as an interpreter and only compiles the "hot"
 code -- the code executed most frequently. by deferring compilation, the
 compiler has access to profiling data, which can be used to improve
 optimization decisions.
-
-to make things more complicated, HotSpot comes with two compilers:
-
-* the client compiler: optimized to reduce application startup time and memory
-  footprint, employing fewer complex optimizations than the server compiler,
-  and accordingly requiring less time for compilation.
-
-* the server compiler: optimized to maximize peak operating speed, and is
-  intended for long-running server applications; the server compiler can
-  perform an impressive variety of optimizations.
-
-the default is to use the client compiler. JVM developers often refer to the
-compilers by the names `C1` (compiler 1, client compiler) and `C2` (compiler 2,
-server compiler).
-
-the primary difference between the two compilers is their aggressiveness in
-compiling code. the client compiler begins compiling sooner than the server
-compiler does. this means that during the beginning of code execution, the
-client compiler will be faster, because it will have compiled correspondingly
-more code than the server compiler.
-
-the engineering trade-off here is the knowledge the server compiler gains
-while it waits: that knowledge allows the server compiler to make better
-optimizations in the compiled code.
-
-in Java 7, to use tiered compilation, specify the server compiler with
-`-server` and include the flag `-XX:+TieredCompilation`.
 
 ## Continuous recompilation ##
 
@@ -104,7 +127,7 @@ already-loaded classes. timing measurements in the face of continuous
 recompilation can be quite noisy and misleading, and it is often necessary to
 run Java code for quite a long time before obtaining useful performance data.
 
-# JVM compiler #
+# JVM Performance #
 
 ## Dead-code elimination ##
 
