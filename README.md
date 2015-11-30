@@ -12,8 +12,10 @@ micro-benchmarking JNI/Java ... is that really necessary for modern JVM?!?
 
 most of the time performance needs to be balanced against other requirements,
 such as functionality, reliability, maintainability, extensibility, time to
-market, and other business and engineering considerations. as for Java language
-constructs, it is much harder to measure the performance than it looks.
+market, and other business and engineering considerations.
+
+as for the Java language constructs, it is much harder to measure the
+performance than it looks.
 
 > you're not always measuring what you think you're measuring.
 
@@ -71,9 +73,9 @@ while it waits: that knowledge allows the server compiler to make better
 optimizations in the compiled code. ultimately, code produced by the server
 compiler will be faster than that produced by the client compiler.
 
-tiered compilation means the JVM starts with the client compiler, and then uses
-the server compiler as code gets hotter. in Java 7, to use tiered compilation,
-specify the server compiler with `-server` and include the flag
+*tiered compilation* means the JVM starts with the client compiler, and then
+uses the server compiler as code gets hotter. in Java 7, to use tiered
+compilation, specify the server compiler with `-server` and include the flag
 `-XX:+TieredCompilation`. in Java 8, it is enabled by default.
 
 ## Just-in-time compilation ##
@@ -126,6 +128,32 @@ new classes, or the execution of code paths that have not yet been traversed in
 already-loaded classes. timing measurements in the face of continuous
 recompilation can be quite noisy and misleading, and it is often necessary to
 run Java code for quite a long time before obtaining useful performance data.
+
+## Code cache ##
+
+when the JVM compiles code, it holds the set of assembly-language instructions
+in the code cache, and its default size is
+
+* 32-bit client, Java 8: 32MB,
+
+* 32-bit server with tiered compilation, Java 8: 240MB,
+
+* 64-bit server with tiered compilation, Java 8: 240MB,
+
+* 32-bit client, Java 7: 32MB,
+
+* 32-bit server, Java 7: 32MB,
+
+* 64-bit server, Java 7: 48MB,
+
+* 64-bit server with tiered compilation, Java 7: 96MB.
+
+the maximum size of the code cache is set via the `-XX:ReservedCodeCacheSize=N`
+flag. code cache is managed like most memory in the JVM: there is an initial
+size (specified by `-XX:InitialCodeCacheSize=N`). allocation of the code cache
+size starts at the initial size and increases as the cache fills up. on Intel
+machines, the client compiler starts with a 160KB cache and the server compiler
+starts with a 2,496KB cache.
 
 # JVM Performance #
 
