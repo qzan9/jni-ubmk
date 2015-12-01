@@ -99,6 +99,24 @@ code -- the code executed most frequently. by deferring compilation, the
 compiler has access to profiling data, which can be used to improve
 optimization decisions.
 
+compilation is based on two counters in the JVM: the number of times the method
+as been called, and the number of times any loops in the method have branched
+back. when the JVM executes a Java method, it checks the sum of those two
+counters and decides whether or not the method is eligible for compilation.
+
+compilation threshold is set up by the value of the `-XX:CompileThreshold=N`
+flag. the default value of `N` for the client compiler is 1,500; for the server
+compiler it is `10,000`. changing the `CompileThreshold` flag has been a
+popular recommendation in performance circles for quite some time.
+
+periodically ( specifically, when the JVM reaches a safepoint), the value of
+each counter is reduced. practically speaking, this means that the counters are
+a relative measure of the *recent* hotness of the method or loop. one side
+effect of this is that somewhat-frequently executed code may never be compiled
+(lukewarm [as opposed to hot]). this is one case where reducing the compilation
+threshold can be beneficial, and it is another reason why tiered compilation is
+usually slightly faster than the server compiler alone.
+
 ## Continuous recompilation ##
 
 HotSpot compilation is not an all-or-nothing proposition. after interpreting a
@@ -114,9 +132,21 @@ initial version of HotSpot performs compilation one method at a time. after the
 method is compiled, it does not switch to the compiled version until the method
 exits and is re-entered -- the compiled version will only be used for
 subsequent invocations. the result, in some cases, is that the compiled version
-is never used. more recent versions of HotSpot use a technique called on-stack
-replacement (OSR) to allow a switch from interpretation to compiled code (or
-swapping one version of compiled code for another) in the middle of a loop.
+is never used.
+
+more recent versions of HotSpot use a technique called on-stack replacement
+(OSR) to allow a switch from interpretation to compiled code (or swapping one
+version of compiled code for another) in the middle of a loop; the JVM has the
+ability to start executing the compiled version of the loop while the loop is
+still running. when the code for the loop has finished compiling, the JVM
+replaces the code (on-stack), and the next iteration of the loop will execute
+the much-faster compiled version of the code.
+
+OSR compilation is trigged by the value of three flags:
+
+```
+    OSR trigger = (CompiledThreshold * (OnStackReplacePercentage - InterpreterProfilePercentage) / 100)
+```
 
 writing -- and interpreting -- benchmarks is far more difficult and complicated
 for dynamically compiled languages than for statically compiled ones. in many
