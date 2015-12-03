@@ -23,7 +23,7 @@ in fact, you're *usually not* measuring what you think you're measuring.
 
 # JIT Compiler #
 
-JIT compiler is the heart of the JVM. nothing in the JVM affects performance
+JIT compiler is the HEART of the JVM. nothing in the JVM affects performance
 more than the compiler, and understanding dynamic compilation and optimization
 is the key to understanding how to tell a good microbenchmark (and there are
 woefully few of these) from the bad ones.
@@ -117,8 +117,6 @@ effect of this is that somewhat-frequently executed code may never be compiled
 threshold can be beneficial, and it is another reason why tiered compilation is
 usually slightly faster than the server compiler alone.
 
-## Continuous recompilation ##
-
 HotSpot compilation is not an all-or-nothing proposition. after interpreting a
 code path a certain number of times, it is compiled into machine code. but the
 JVM continues profiling, and may recompile the code again later with a higher
@@ -184,6 +182,31 @@ size (specified by `-XX:InitialCodeCacheSize=N`). allocation of the code cache
 size starts at the initial size and increases as the cache fills up. on Intel
 machines, the client compiler starts with a 160KB cache and the server compiler
 starts with a 2,496KB cache.
+
+## Compilation Threads ##
+
+when a method (or loop) becomes eligible for compilation, it is queued for
+compilation, and that queue is processed by one or more background threads.
+this means that compilation is an asynchronous process, and it allows the
+program to continue executing even while the code in question is being
+compiled.
+
+these queues are not strictly first in, first out: methods whose invocation
+counters are higher have priority.
+
+for C1, the JVM starts one compilation thread, for C2, it starts two. when
+tiered compilation is in effect, the JVM will by default start multiple client
+and server threads based on the number of CPUs on the target platform.
+
+the number of compiler threads can be adjusted by setting the `-XX:CICompilerCount=N`
+flag. for tiered compilation, one-third of them will be used to process the
+client compiler queue, and the remaining threads (at least one) will be used to
+process the server compiler queue.
+
+if `-XX:+BackgroundCompilation` is set to `false`, in which case when a method
+is eligible for compilation, code that wants to execute it will wait until it
+is in fact compiled (rather than continuing to execute in the interpreter
+asynchronously).
 
 # JVM Performance #
 
