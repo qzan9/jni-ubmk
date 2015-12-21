@@ -14,7 +14,7 @@ most of the time performance needs to be balanced against other requirements,
 such as functionality, reliability, maintainability, extensibility, time to
 market, and other business and engineering considerations.
 
-as for the Java language constructs, it is much harder to measure the
+as for the Java language constructs, it is *much harder* to measure the
 performance than it looks.
 
 > you're not always measuring what you think you're measuring.
@@ -40,8 +40,8 @@ there are three versions of the JIT compiler
 
 32-bit binary is expected to have (up to) two compilers, while the 64-bit
 binary will have only a single compiler. in fact, the 64-bit binary will have
-two compilers, since the client compiler is needed to support tiered
-compilation. but a 64-bit JVM cannot be run with only the client compiler.
+two compilers, since the client compiler is needed to support *tiered*
+*compilation*. but a 64-bit JVM cannot be run with only the client compiler.
 
 if the size of your heap will be less than about 3GB, the 32-bit version of
 Java will be faster and have a smaller footprint. programs that make extensive
@@ -52,17 +52,17 @@ cannot use the CPU's 64-bit registers, though that is a very exceptional case.
 
 HotSpot comes with two compilers:
 
-* the client compiler (C1): optimized to reduce application startup time and
-  memory footprint, employing fewer complex optimizations than the server
+* the client compiler (C1): optimized to reduce application *startup time* and
+  *memory footprint*, employing fewer complex optimizations than the server
   compiler, and accordingly requiring less time for compilation.
 
-* the server compiler (C2): optimized to maximize peak operating speed, and is
-  intended for long-running server applications; the server compiler can
+* the server compiler (C2): optimized to maximize *peak operating speed*, and 
+  is intended for long-running server applications; the server compiler can
   perform an impressive variety of optimizations.
 
 the default is to use the client compiler.
 
-the primary difference between the two compilers is their aggressiveness in
+the primary difference between the two compilers is their *aggressiveness* in
 compiling code. the client compiler begins compiling sooner than the server
 compiler does. this means that during the beginning of code execution, the
 client compiler will be faster, because it will have compiled correspondingly
@@ -83,20 +83,20 @@ compilation, specify the server compiler with `-server` and include the flag
 when Java source codes are converted into JVM bytecodes, unlike static
 compilers, `javac` does very little optimization -- the optimizations that
 would be done by the compiler in a statically compiled language are performed
-instead by the runtime when the program is executed.
+instead *by the runtime* when the program is executed.
 
 strictly defined, a JIT-based virtual machine converts all bytecodes into
 machine code before execution, but does so in a lazy fashion: the JIT only
 compiles a code path when it knows that code path is about to be executed.
 to avoid a significant startup penalty, the JIT compiler has to be fast, which
-means that it cannot spend as much time optimizing.
+means that *it cannot spend as much time optimizing*.
 
 ## HotSpot dynamic compilation ##
 
 the HotSpot execution process combines interpretation, profiling, and dynamic
-compilation. HotSpot first runs as an interpreter and only compiles the "hot"
-code -- the code executed most frequently. by deferring compilation, the
-compiler has access to profiling data, which can be used to improve
+compilation. HotSpot *first runs as an interpreter* and only compiles the "hot"
+code -- the code executed most frequently. by *deferring compilation*, the
+compiler has access to *profiling data*, which can be used to improve
 optimization decisions.
 
 compilation is based on two counters in the JVM: the number of times the method
@@ -109,9 +109,9 @@ flag. the default value of `N` for the client compiler is 1,500; for the server
 compiler it is `10,000`. changing the `CompileThreshold` flag has been a
 popular recommendation in performance circles for quite some time.
 
-periodically ( specifically, when the JVM reaches a safepoint), the value of
+periodically (specifically, when the JVM reaches a safepoint), the value of
 each counter is reduced. practically speaking, this means that the counters are
-a relative measure of the *recent* hotness of the method or loop. one side
+a relative measure of the *recent hotness* of the method or loop. one side
 effect of this is that somewhat-frequently executed code may never be compiled
 (lukewarm [as opposed to hot]). this is one case where reducing the compilation
 threshold can be beneficial, and it is another reason why tiered compilation is
@@ -207,6 +207,29 @@ if `-XX:+BackgroundCompilation` is set to `false`, in which case when a method
 is eligible for compilation, code that wants to execute it will wait until it
 is in fact compiled (rather than continuing to execute in the interpreter
 asynchronously).
+
+## Inlining ##
+
+code that follows good object-oriented design often contains a number of
+attributes that are accessed via getters (and perhaps setters). the overhead
+for invoking a method call like this is quite high, especially relative to the
+amount of code in the method. JVMs now routinely perform code inlining for
+these kinds of methods.
+
+inlining is enabled by default. it can be disabled using `-XX:-Inline` flag.
+
+there is *NO basic visibility* into how the JVM inlines code. if you compile
+the JVM from source, you can produce a debug version that includes the flag
+`-XX:+PrintInlining`.
+
+the basic decision about whether to inline a method depends on *how hot* it is
+and its *size*. the JVM determines if a method is hot (i.e., called frequently)
+based on an internal calculation; it is *NOT* directly subject to any tunable
+parameters. if a method is eligible for inlining because it is called
+frequently, then it will be inlined only if its bytecode size is less than 325
+bytes (or whatever is specified as the `-XX:MaxFreqInlineSize=N` flag).
+otherwise, it is eligible for inlining only if it is small: less than 35 bytes
+(or whatever is specified as the `-XX:MaxInlineSize=N` flag).
 
 # JVM Performance #
 
