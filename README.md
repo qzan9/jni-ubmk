@@ -1,7 +1,5 @@
 # jni-ubmk #
 
-micro-benchmarking JNI/Java ... is that really necessary for modern JVM?!?
-
 > millibenchmarks are not really hard.
 > 
 > microbenchmarks are challenging, but OK.
@@ -231,7 +229,13 @@ bytes (or whatever is specified as the `-XX:MaxFreqInlineSize=N` flag).
 otherwise, it is eligible for inlining only if it is small: less than 35 bytes
 (or whatever is specified as the `-XX:MaxInlineSize=N` flag).
 
-# JVM Performance #
+## Escape analysis ##
+
+server compiler performs some very aggressive optimizations if escape analysis
+is enabled (`-XX:+DoEscapeAnalysis`, which is `true` by default).
+
+in rare cases, escape analysis will get things wrong, in which case disabling
+it will lead to faster and/or more stable code.
 
 ## Dead-code elimination ##
 
@@ -269,7 +273,7 @@ the "time per iteration" measurement.
 run your benchmarks with `-verbose:gc`, you can see how much time is spent in
 garbage collection and adjust your timing data accordingly.
 
-## Dynamic deoptimization ##
+## Deoptimization ##
 
 many standard optimizations can only be performed within a "basic block" and
 so inlining method calls is often important to achieve good optimization.
