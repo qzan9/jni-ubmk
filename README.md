@@ -275,15 +275,12 @@ garbage collection and adjust your timing data accordingly.
 
 ## Deoptimization ##
 
-many standard optimizations can only be performed within a "basic block" and
-so inlining method calls is often important to achieve good optimization.
+deoptimization means that the compiler had to "undo" some previous compilation
+-- invalidate the generated code and revert to interpretation or recompilation
+-- the effect is that the performance of the application will be reduced.
 
-inconveniently, virtual functions pose an impediment to inlining, and virtual
-function calls are more common in Java language than in C++. considering that
-classes can be loaded dynamically, the compiler can make aggressive inlining
-decisions to achieve higher performance, then back out those decisions later
-if they are no longer based on valid assumptions, and will invalidate the
-generated code and revert to interpretation or recompilation.
+there are two cases of deoptimization: when code is "made not entrant", and
+when code is "made zombie".
 
 # Tips #
 
