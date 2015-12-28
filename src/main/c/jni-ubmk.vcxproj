@@ -151,6 +151,9 @@
   <ItemGroup>
     <ClCompile Include="jni_ubmk.c" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="jni_ubmk.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

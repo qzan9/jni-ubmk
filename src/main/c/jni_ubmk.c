@@ -1,25 +1,7 @@
-#ifdef __GNUC__
-#	define _SVID_SOURCE
-#endif /* __GNUC__ */
-
 #include <stdio.h>
 #include <math.h>
 
-#include <jni.h>
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *, void *);
-//JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *, void *);
-
-JNIEXPORT int JNICALL emptyJniCall(JNIEnv *, jobject);
-JNIEXPORT jdouble JNICALL someCalcJni(JNIEnv *, jobject, jint, jint, jint);
-
-#ifdef __cplusplus
-}
-#endif
+#include "jni_ubmk.h"
 
 static const JNINativeMethod methods[] = {
 	{ "emptyJniCall", "()I"   , (void *)emptyJniCall },
@@ -51,7 +33,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *jvm, void *reserved)
 //{
 //}
 
-JNIEXPORT int JNICALL emptyJniCall(JNIEnv *env, jobject thisObj)
+JNIEXPORT jint JNICALL emptyJniCall(JNIEnv *env, jobject thisObj)
 {
 	return 0;
 }
