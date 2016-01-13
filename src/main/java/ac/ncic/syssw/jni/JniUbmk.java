@@ -2,16 +2,14 @@ package ac.ncic.syssw.jni;
 
 public final class JniUbmk {
 	static {
-		System.loadLibrary("jni-ubmk");
+		System.loadLibrary("jniubmk");
 	}
 
 	/**
 	 * simply return ZER0 from native binaries; consider it as an empty JNI call.
 	 */
-	public static native int emptyJniCall();
-	public static int emptyJvmMethod() {
-		return 0;
-	}
+	public static native void emptyJniCall();
+	public static native int  emptyJniCallParam5(int param0, int param1, int param2, int param3, int param4);
 
 	/**
 	 * do a three-level loop calculation.
