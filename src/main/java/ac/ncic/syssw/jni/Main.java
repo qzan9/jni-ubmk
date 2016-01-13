@@ -1,6 +1,4 @@
-package ac.ncic.syssw.jni.ubmk;
-
-import ac.ncic.syssw.jni.ubmk.RunBmk;
+package ac.ncic.syssw.jni;
 
 public class Main {
 	public static void main(String[] args) {

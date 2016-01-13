@@ -1,6 +1,4 @@
-package ac.ncic.syssw.jni.ubmk;
-
-import static ac.ncic.syssw.jni.ubmk.JniUbmk.*;
+package ac.ncic.syssw.jni;
 
 public class RunBmk {
 	private RunBmk() { }
@@ -15,17 +13,17 @@ public class RunBmk {
 
 	public void uBmkEmptyCall() {
 		/* warm up, guys. */
-		emptyJvmMethod();
-		emptyJniCall();
+		JniUbmk.emptyJvmMethod();
+		JniUbmk.emptyJniCall();
 //		emptyJvmMethodHere();
 
 		/* run the tests and measure the time. */
 		long then0 = System.nanoTime();
-		int  test0 = emptyJvmMethod();
+		int  test0 = JniUbmk.emptyJvmMethod();
 		long  now0 = System.nanoTime();
 
 		long then1 = System.nanoTime();
-		int  test1 = emptyJniCall();
+		int  test1 = JniUbmk.emptyJniCall();
 		long  now1 = System.nanoTime();
 
 		long then2 = System.nanoTime();
@@ -56,17 +54,17 @@ public class RunBmk {
 		/* warm up. */
 		System.out.println("warming up ... ignore the outputs ...");
 		for (int t = 0; t < 10; t++) {
-			System.out.println(t + " - " + someCalcJni(x, y, z) + ", " + someCalcJvm(x, y, z));
+			System.out.println(t + " - " + JniUbmk.someCalcJni(x, y, z) + ", " + JniUbmk.someCalcJvm(x, y, z));
 		}
 
 		/* JIT may be finished; start real benchmarking. */
 		System.out.println("start benchmarking ...");
 		long then0 = System.currentTimeMillis();
-		double test0 = someCalcJni(x, y, z);
+		double test0 = JniUbmk.someCalcJni(x, y, z);
 		long  now0 = System.currentTimeMillis();
 
 		long then1 = System.currentTimeMillis();
-		double test1 = someCalcJvm(x, y, z);
+		double test1 = JniUbmk.someCalcJvm(x, y, z);
 		long  now1 = System.currentTimeMillis();
 
 		System.out.printf("JNI result: %.6f, %d ms.\n", test0, (now0 - then0));

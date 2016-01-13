@@ -1,4 +1,4 @@
-package ac.ncic.syssw.jni.ubmk;
+package ac.ncic.syssw.jni;
 
 public final class JniUbmk {
 	static {
