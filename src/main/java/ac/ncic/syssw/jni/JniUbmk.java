@@ -9,7 +9,7 @@ public final class JniUbmk {
 	 * simply return ZER0 from native binaries; consider it as an empty JNI call.
 	 */
 	public static native void emptyJniCall();
-	public static native int  emptyJniCallParam5(int param0, int param1, int param2, int param3, int param4);
+	public static native int  emptyJniCallParam5(long param0, int param1, int param2, int param3, int param4);
 
 	/**
 	 * do a three-level loop calculation.

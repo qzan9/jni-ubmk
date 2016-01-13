@@ -18,7 +18,7 @@ JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM *, void *);
 //JNIEXPORT void JNICALL JNI_OnUnload(JavaVM *, void *);
 
 JNIEXPORT void JNICALL emptyJniCall(JNIEnv *, jobject);
-JNIEXPORT jint JNICALL emptyJniCallParam5(JNIEnv *, jobject, jint, jint, jint, jint, jint);
+JNIEXPORT jint JNICALL emptyJniCallParam5(JNIEnv *, jobject, jlong, jint, jint, jint, jint);
 
 JNIEXPORT jdouble JNICALL someCalcJni(JNIEnv *, jobject, jint, jint, jint);
 

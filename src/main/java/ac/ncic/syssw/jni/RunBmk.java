@@ -25,7 +25,7 @@ public class RunBmk {
 		System.out.println("\nwarming up ...");
 		for (int t = 0; t < DEFAULT_WARMUP_ITER; t++) {
 			JniUbmk.emptyJniCall();
-			System.out.printf("%d ", JniUbmk.emptyJniCallParam5(t, t + 1, t + 2, t + 3, t + 4));
+			System.out.printf("%d ", JniUbmk.emptyJniCallParam5((long) t, t + 1, t + 2, t + 3, t + 4));
 		}
 		System.out.println();
 
@@ -39,7 +39,7 @@ public class RunBmk {
 		sum = 0;
 		startTime = System.nanoTime();
 		for (int t = 0; t < DEFAULT_BMK_ITER; t++) {
-			sum += JniUbmk.emptyJniCallParam5(t, t + 1, t + 2, t + 3, t + 4);
+			sum += JniUbmk.emptyJniCallParam5(startTime, t + 1, t + 2, t + 3, t + 4);
 		}
 		elapsedTime = System.nanoTime() - startTime;
 		System.out.println(sum);

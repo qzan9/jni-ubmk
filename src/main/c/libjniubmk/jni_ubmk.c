@@ -16,7 +16,7 @@
 
 static const JNINativeMethod methods[] = {
 	{       "emptyJniCall", "()V"     , (void *)emptyJniCall       },
-	{ "emptyJniCallParam5", "(IIIII)I", (void *)emptyJniCallParam5 },
+	{ "emptyJniCallParam5", "(JIIII)I", (void *)emptyJniCallParam5 },
 	{        "someCalcJni", "(III)D"  , (void *)someCalcJni        },
 };
 
@@ -51,7 +51,7 @@ JNIEXPORT void JNICALL emptyJniCall(JNIEnv *env, jobject thisObj)
 }
 
 JNIEXPORT jint JNICALL emptyJniCallParam5(JNIEnv *env, jobject thisObj,
-                                          jint param0, jint param1, jint param2, jint param3, jint param4)
+                                          jlong param0, jint param1, jint param2, jint param3, jint param4)
 {
 	return (jint)0;
 }
