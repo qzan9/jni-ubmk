@@ -1,5 +1,8 @@
 package ac.ncic.syssw.jni;
 
+import java.nio.ByteBuffer;
+import java.util.Random;
+
 public class RunBmk {
 
 	public static final int DEFAULT_WARMUP_ITER = 10000;
@@ -82,5 +85,57 @@ public class RunBmk {
 //		}
 		elapsedTime = System.nanoTime() - startTime;
 		System.out.printf("JVM result: %.6f, %.1f ms\n", test, (double) elapsedTime / 1000 / 1000);
+	}
+
+	public void uBmkNewByteArray(String[] args) {
+		int sizek, size, iter;
+		int i;
+		long startTime, elapsedTime;
+		byte[] byteArray;
+		ByteBuffer buffer;
+		Random random;
+
+		try {
+			if (args.length != 2) {
+				sizek = 512;
+				iter  = 1024;
+			} else {
+				sizek = Integer.parseInt(args[0]);
+				iter  = Integer.parseInt(args[1]);
+			}
+		} catch (NumberFormatException e) {
+			System.out.println("options: [SIZE_IN_KILO] [ITERATION_NUMBER]");
+			System.out.println("using the defaults ...");
+			sizek = 512;
+			iter  = 1024;
+		}
+
+		size = sizek * 1024;
+		random = new Random();
+
+		elapsedTime = 0;
+		for (i = 0; i < iter; i++) {
+			startTime = System.nanoTime();
+			byteArray = new byte[size];
+			elapsedTime += System.nanoTime() - startTime;
+			random.nextBytes(byteArray);
+		}
+		System.out.printf("byte array: %.1f ns.", (double) elapsedTime / iter);
+		System.out.println();
+
+		elapsedTime = 0;
+		buffer = ByteBuffer.allocateDirect(size);
+		byteArray = new byte[size];
+		for (i = 0; i < iter; i++) {
+			random.nextBytes(byteArray);
+			buffer.put(byteArray);
+			buffer.rewind();
+			startTime = System.nanoTime();
+			buffer.get(byteArray);
+			elapsedTime += System.nanoTime() - startTime;
+			buffer.clear();
+		}
+		System.out.printf("direct buffer: %.1f ns.", (double) elapsedTime / iter);
+		System.out.println();
 	}
 }
