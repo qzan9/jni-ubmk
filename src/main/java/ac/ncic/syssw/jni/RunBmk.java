@@ -92,6 +92,7 @@ public class RunBmk {
 		int i;
 		long startTime, elapsedTime;
 		byte[] byteArray;
+//		byte[] byteArray, byteArrayForBuffer;
 		ByteBuffer buffer;
 		Random random;
 
@@ -113,6 +114,9 @@ public class RunBmk {
 		size = sizek * 1024;
 		random = new Random();
 
+		System.out.printf("size: %dKB, iter: %d", sizek, iter);
+		System.out.println();
+
 		elapsedTime = 0;
 		for (i = 0; i < iter; i++) {
 			startTime = System.nanoTime();
@@ -124,18 +128,25 @@ public class RunBmk {
 		System.out.println();
 
 		elapsedTime = 0;
-		buffer = ByteBuffer.allocateDirect(size);
 		byteArray = new byte[size];
+//		byteArrayForBuffer = new byte[size*2];
+		buffer = ByteBuffer.allocate(size);
+//		buffer = ByteBuffer.allocateDirect(size);
+//		buffer = ByteBuffer.wrap(byteArrayForBuffer);
 		for (i = 0; i < iter; i++) {
 			random.nextBytes(byteArray);
 			buffer.put(byteArray);
+//			random.nextBytes(byteArray);
+//			buffer.put(byteArray);
 			buffer.rewind();
 			startTime = System.nanoTime();
+//			buffer.limit(size);
+//			byteArray = buffer.array();    // BufferOverflow
 			buffer.get(byteArray);
 			elapsedTime += System.nanoTime() - startTime;
 			buffer.clear();
 		}
-		System.out.printf("direct buffer: %.1f ns.", (double) elapsedTime / iter);
+		System.out.printf("buffer array: %.1f ns.", (double) elapsedTime / iter);
 		System.out.println();
 	}
 }
