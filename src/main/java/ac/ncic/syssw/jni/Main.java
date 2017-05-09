@@ -4,6 +4,8 @@ public class Main {
 	public static void main(String[] args) {
 //		RunBmk.getInstance().uBmkSomeCalc(args);
 //		RunBmk.getInstance().uBmkEmptyCall();
-		RunBmk.getInstance().uBmkNewByteArray(args);
+//		RunBmk.getInstance().uBmkNewByteArray(args);
+//		RunBmk.getInstance().uBmkStringGetBytes();
+		RunBmk.getInstance().uBmkUnsafeCopy();
 	}
 }

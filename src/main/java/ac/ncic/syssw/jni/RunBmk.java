@@ -3,6 +3,8 @@ package ac.ncic.syssw.jni;
 import java.nio.ByteBuffer;
 import java.util.Random;
 
+import sun.nio.ch.DirectBuffer;
+
 public class RunBmk {
 
 	public static final int DEFAULT_WARMUP_ITER = 10000;
@@ -149,4 +151,101 @@ public class RunBmk {
 		System.out.printf("buffer array: %.1f ns.", (double) elapsedTime / iter);
 		System.out.println();
 	}
+
+	public void uBmkStringGetBytes() {
+		class StringGetBytes {
+			void run(int exp) {
+				String aString;
+				StringBuilder stringBuilder;
+				byte[] byteArray;
+				int len;
+
+				int i, j, k;
+				long startTime, elapsedTime;
+				Random random;
+
+				stringBuilder = new StringBuilder();
+				len = 1;
+				random = new Random();
+				for (i = 0; i <= exp; i++) {
+					stringBuilder.setLength(0);
+					stringBuilder.trimToSize();
+					for (j = 0; j < len; j++) {
+						stringBuilder.append((char)(random.nextInt(128)));
+					}
+					aString = stringBuilder.toString();
+
+					startTime = System.nanoTime();
+					for (k = 0; k < DEFAULT_BMK_ITER; k++) {
+						byteArray = aString.getBytes();
+					}
+					elapsedTime = System.nanoTime() - startTime;
+
+					System.out.printf("%7d: %.1f ns\n", len, (double) elapsedTime / DEFAULT_BMK_ITER);
+
+					len *= 2;
+				}
+			}
+		}
+
+		StringGetBytes stringGetBytes = new StringGetBytes();
+
+		for (int k = 0; k < DEFAULT_WARMUP_ITER; k++) {
+//		while (true) {
+			stringGetBytes.run(23);
+		}
+
+		System.gc();
+
+		stringGetBytes.run(23);
+		stringGetBytes.run(23);
+	}
+
+	public void uBmkUnsafeCopy() {
+		class UnsafeCopy {
+			void run(int exp) {
+				byte[] byteArray;
+				ByteBuffer byteBuffer;
+				long byteBufferAddress;
+				int size;
+
+				int i, j, k;
+				long startTime, elapsedTime;
+				Random random;
+
+				byteBuffer = ByteBuffer.allocateDirect(8388608);
+				byteBufferAddress = ((DirectBuffer) byteBuffer).address();
+				size = 1;
+				random = new Random();
+				for (i = 0; i <= exp; i++) {
+					byteArray = new byte[size];
+					random.nextBytes(byteArray);
+
+					startTime = System.nanoTime();
+					for (k = 0; k < DEFAULT_BMK_ITER; k++) {
+						U2Unsafe.copyByteArrayToDirectBuffer(byteArray, 0, byteBufferAddress, size);
+					}
+					elapsedTime = System.nanoTime() - startTime;
+
+					System.out.printf("%7d: %.1f ns\n", size, (double) elapsedTime / DEFAULT_BMK_ITER);
+
+					size *= 2;
+				}
+			}
+		}
+
+		UnsafeCopy unsafeCopy = new UnsafeCopy();
+
+		for (int k = 0; k < DEFAULT_WARMUP_ITER; k++) {
+//		while (true) {
+			unsafeCopy.run(23);
+		}
+
+		System.gc();
+
+		unsafeCopy.run(23);
+		unsafeCopy.run(23);
+	}
+
 }
+
