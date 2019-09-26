@@ -1,4 +1,4 @@
-# jni-ubmk #
+# JNI Micro-Benchmarking #
 
 > millibenchmarks are not really hard.
 > 
@@ -19,14 +19,14 @@ performance than it looks.
 
 in fact, you're *usually not* measuring what you think you're measuring.
 
-# JIT Compiler #
+## The JIT Compiler ##
 
 JIT compiler is the HEART of the JVM. nothing in the JVM affects performance
 more than the compiler, and understanding dynamic compilation and optimization
 is the key to understanding how to tell a good microbenchmark (and there are
 woefully few of these) from the bad ones.
 
-## 32-bit and 64-bit ##
+### 32-bit and 64-bit ###
 
 there are three versions of the JIT compiler
 
@@ -46,7 +46,7 @@ Java will be faster and have a smaller footprint. programs that make extensive
 use of `long` or `double` variables will be slower on a 32-bit JVM because they
 cannot use the CPU's 64-bit registers, though that is a very exceptional case.
 
-## C1 and C2 ##
+### C1 and C2 ###
 
 HotSpot comes with two compilers:
 
@@ -76,7 +76,7 @@ uses the server compiler as code gets hotter. in Java 7, to use tiered
 compilation, specify the server compiler with `-server` and include the flag
 `-XX:+TieredCompilation`. in Java 8, it is enabled by default.
 
-## Just-in-time compilation ##
+### Just-in-time compilation ###
 
 when Java source codes are converted into JVM bytecodes, unlike static
 compilers, `javac` does very little optimization -- the optimizations that
@@ -89,7 +89,7 @@ compiles a code path when it knows that code path is about to be executed.
 to avoid a significant startup penalty, the JIT compiler has to be fast, which
 means that *it cannot spend as much time optimizing*.
 
-## HotSpot dynamic compilation ##
+### HotSpot dynamic compilation ###
 
 the HotSpot execution process combines interpretation, profiling, and dynamic
 compilation. HotSpot *first runs as an interpreter* and only compiles the "hot"
@@ -122,7 +122,7 @@ level of optimization if it decides the code path is particularly hot or future
 profiling data suggests opportunities for additional optimization. the JVM may
 recompile the same bytecodes many times in a single application execution.
 
-## On-stack replacement ##
+### On-stack replacement ###
 
 initial version of HotSpot performs compilation one method at a time. after the
 method is compiled, it does not switch to the compiled version until the method
@@ -155,7 +155,7 @@ already-loaded classes. timing measurements in the face of continuous
 recompilation can be quite noisy and misleading, and it is often necessary to
 run Java code for quite a long time before obtaining useful performance data.
 
-## Code cache ##
+### Code cache ###
 
 when the JVM compiles code, it holds the set of assembly-language instructions
 in the code cache, and its default size is
@@ -181,7 +181,7 @@ size starts at the initial size and increases as the cache fills up. on Intel
 machines, the client compiler starts with a 160KB cache and the server compiler
 starts with a 2,496KB cache.
 
-## Compilation Threads ##
+### Compilation Threads ###
 
 when a method (or loop) becomes eligible for compilation, it is queued for
 compilation, and that queue is processed by one or more background threads.
@@ -206,7 +206,7 @@ is eligible for compilation, code that wants to execute it will wait until it
 is in fact compiled (rather than continuing to execute in the interpreter
 asynchronously).
 
-## Inlining ##
+### Inlining ###
 
 code that follows good object-oriented design often contains a number of
 attributes that are accessed via getters (and perhaps setters). the overhead
@@ -229,7 +229,7 @@ bytes (or whatever is specified as the `-XX:MaxFreqInlineSize=N` flag).
 otherwise, it is eligible for inlining only if it is small: less than 35 bytes
 (or whatever is specified as the `-XX:MaxInlineSize=N` flag).
 
-## Escape analysis ##
+### Escape analysis ###
 
 server compiler performs some very aggressive optimizations if escape analysis
 is enabled (`-XX:+DoEscapeAnalysis`, which is `true` by default).
@@ -237,7 +237,7 @@ is enabled (`-XX:+DoEscapeAnalysis`, which is `true` by default).
 in rare cases, escape analysis will get things wrong, in which case disabling
 it will lead to faster and/or more stable code.
 
-## Dead-code elimination ##
+### Dead-code elimination ###
 
 optimizing compilers are adept at spotting dead code -- code that has no effect
 on the outcome of the program execution. many microbenchmarks perform much
@@ -245,7 +245,7 @@ on the outcome of the program execution. many microbenchmarks perform much
 compiler is faster (though it often is) but because the server compiler is more
 adept at optimizing away blocks of dead code.
 
-## Warmup ##
+### Warmup ###
 
 if you're looking to measure the performance of idiom X, you generally want to
 measure its compiled performance, not its interpreted performance. to do so
@@ -264,7 +264,7 @@ kick in, then restructure your benchmark program to ensure that all of this
 compilation occurs before you start timing and that no further compilation
 occurs in the middle of your timing loops.
 
-## Garbage collection ##
+### Garbage collection ###
 
 don't forget GC -- a small change in the number of iterations could mean the
 difference between no garbage collection and one garbage collection, skewing
@@ -273,7 +273,7 @@ the "time per iteration" measurement.
 run your benchmarks with `-verbose:gc`, you can see how much time is spent in
 garbage collection and adjust your timing data accordingly.
 
-## Deoptimization ##
+### Deoptimization ###
 
 deoptimization means that the compiler had to "undo" some previous compilation
 -- invalidate the generated code and revert to interpretation or recompilation
@@ -282,7 +282,7 @@ deoptimization means that the compiler had to "undo" some previous compilation
 there are two cases of deoptimization: when code is "made not entrant", and
 when code is "made zombie".
 
-# Tips #
+## Tips ##
 
 * microbenchmarks are difficult to write correctly and can be misleading
   depending on who is writing the tests ...
@@ -305,3 +305,4 @@ when code is "made zombie".
   run it serveral times, discarding outliers.
 
 * use a library, such as JMH and Caliper.
+
